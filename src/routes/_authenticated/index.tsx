@@ -53,7 +53,7 @@ function Index() {
   const meta = user.user_metadata as { full_name?: string; name?: string } | undefined;
   const fullName = meta?.full_name || meta?.name || user.email?.split("@")[0] || "";
   const firstName = fullName.split(" ")[0] || "você";
-  const sd = salesDashboard(data.business, t);
+  const sd = salesDashboard(data.business, today());
   const t = today();
   const month = t.slice(0, 7);
 
