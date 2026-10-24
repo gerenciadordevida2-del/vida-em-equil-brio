@@ -24,6 +24,7 @@ import {
 import { Card } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
 import { dailyScore, toggleHabitDate } from "@/lib/home-metrics";
+import { salesDashboard } from "@/lib/commerce";
 import { useData, update, uid, today, brl, fmtDate } from "@/lib/store";
 
 export const Route = createFileRoute("/_authenticated/")({
@@ -52,6 +53,7 @@ function Index() {
   const meta = user.user_metadata as { full_name?: string; name?: string } | undefined;
   const fullName = meta?.full_name || meta?.name || user.email?.split("@")[0] || "";
   const firstName = fullName.split(" ")[0] || "você";
+  const sd = salesDashboard(data.business, t);
   const t = today();
   const month = t.slice(0, 7);
 
@@ -190,49 +192,41 @@ function Index() {
       )}
       <section
         className="premium-card budget-card relative mb-4 overflow-hidden p-5"
-        aria-label="Resumo financeiro do mês"
+        aria-label="Resumo de vendas"
       >
         <div className="flex items-center justify-between">
-          <p className="text-xs text-muted-foreground">Saldo do mês</p>
+          <p className="text-xs text-muted-foreground">Faturamento de hoje</p>
           <span className="rounded-full border border-glass-border px-2.5 py-1 text-[10px] text-accent-foreground">
-            {new Date().toLocaleDateString("pt-BR", { month: "long" })}
+            {sd.todayCount} venda(s)
           </span>
         </div>
-        <div className="mt-2 grid grid-cols-[minmax(0,1fr)_72px] items-end gap-2">
-          <p className="break-words font-display text-3xl font-semibold">{brl(balance)}</p>
-          <div
-            className="flex h-10 items-end gap-1"
-            role="img"
-            aria-label="Movimentação financeira em sete períodos do mês"
-          >
-            {dailyAmounts.map((value, i) => (
-              <div
-                key={i}
-                className="w-2 rounded-t-sm bg-primary/60"
-                style={{ height: `${Math.max(8, (value / maxAmount) * 100)}%` }}
-              />
-            ))}
-          </div>
-        </div>
+        <p className="mt-2 break-words font-display text-3xl font-semibold">{brl(sd.todayRevenue)}</p>
         <div className="mt-5 grid grid-cols-2 gap-4 border-t border-glass-border pt-4">
           <div>
             <p className="mb-1 flex items-center gap-1.5 text-[11px] text-muted-foreground">
               <ArrowUpRight className="h-4 w-4 text-success" />
-              Receitas
+              Faturamento do mês
             </p>
-            <p className="break-words text-base font-semibold">{brl(inc)}</p>
+            <p className="break-words text-base font-semibold">{brl(sd.monthRevenue)}</p>
+            <p className="text-[11px] text-muted-foreground">{sd.monthCount} venda(s){sd.ticket !== null ? ` · ticket ${brl(sd.ticket)}` : ""}</p>
           </div>
           <div className="border-l border-glass-border pl-4">
             <p className="mb-1 flex items-center gap-1.5 text-[11px] text-muted-foreground">
-              <ArrowDownRight className="h-4 w-4 text-destructive" />
-              Despesas
+              <ArrowDownRight className="h-4 w-4 text-warning" />
+              A receber
             </p>
-            <p className="break-words text-base font-semibold">{brl(exp)}</p>
+            <p className="break-words text-base font-semibold">{brl(sd.toReceive)}</p>
+            {sd.overdue > 0 && <p className="text-[11px] text-destructive">{brl(sd.overdue)} em atraso</p>}
           </div>
         </div>
+        <p className="mt-3 text-[11px] text-muted-foreground">
+          {sd.monthProfit === null
+            ? "Lucro estimado: informe o custo dos produtos para calcular."
+            : `Lucro estimado no mês: ${brl(sd.monthProfit)}${sd.profitPartial ? " (parcial: há vendas sem custo)" : ""}`}
+        </p>
         <Button asChild variant="link" className="mt-3 h-auto p-0 text-[11px]">
-          <Link to="/financas">
-            Meu panorama financeiro <ArrowRight />
+          <Link to="/financas" search={{ tab: "negocio" } as never}>
+            Ver painel do negócio <ArrowRight />
           </Link>
         </Button>
       </section>
