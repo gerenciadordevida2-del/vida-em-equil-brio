@@ -225,7 +225,7 @@ function Index() {
             : `Lucro estimado no mês: ${brl(sd.monthProfit)}${sd.profitPartial ? " (parcial: há vendas sem custo)" : ""}`}
         </p>
         <Button asChild variant="link" className="mt-3 h-auto p-0 text-[11px]">
-          <Link to="/financas" search={{ tab: "negocio" } as never}>
+          <Link to="/financas">
             Ver painel do negócio <ArrowRight />
           </Link>
         </Button>
