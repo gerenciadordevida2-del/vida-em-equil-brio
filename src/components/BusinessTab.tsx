@@ -470,10 +470,7 @@ function SaleDialog({ sale, onClose }: { sale: Sale | null; onClose: () => void 
     };
     const ok = setBiz((b) => {
       if (!sale && date === today() && !productId) assertStockAvailable(b, date, q);
-      return saveSale({
-        ...b,
-      };
-    }, next);
+      return saveSale(b, next, today());
     });
     if (ok) {
       const linked = status !== "pago" && next.expectedDate;
