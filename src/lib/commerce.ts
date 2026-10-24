@@ -81,6 +81,7 @@ export function applySaleStock(
   next: Sale | null,
   date: string,
   allowNegative = false,
+  reasonOverride?: StockMove["reason"],
 ): BusinessData {
   const ids = new Set([prev?.productId, next?.productId].filter(Boolean) as string[]);
   if (ids.size === 0) return b;
@@ -95,7 +96,7 @@ export function applySaleStock(
     if (qty < 0 && !allowNegative)
       throw new Error(`Estoque insuficiente de “${prod.name}”: restam ${prod.quantity}.`);
     products = products.map((p) => (p.id === pid ? { ...p, quantity: qty } : p));
-    const reason: StockMove["reason"] = !next ? "exclusao" : !prev ? "venda" : "edicao";
+    const reason: StockMove["reason"] = reasonOverride ?? (!next ? "exclusao" : !prev ? "venda" : "edicao");
     moves.push({ id: newId(), productId: pid, date, delta, reason, saleId: (next ?? prev)!.id });
   }
   return { ...b, products, stockMoves: moves };
@@ -127,13 +128,8 @@ export function changeSaleStatus(
   if (!prev) throw new Error("Venda não encontrada.");
   if (prev.status) throw new Error("Esta venda já foi cancelada ou devolvida.");
   const next: Sale = { ...prev, status };
-  const withStock = applySaleStock(b, prev, next, date);
-  const moves = (withStock.stockMoves ?? []).map((m, i, arr) =>
-    i === arr.length - 1 && m.saleId === id && withStock !== b
-      ? { ...m, reason: status === "cancelada" ? ("cancelamento" as const) : ("devolucao" as const) }
-      : m,
-  );
-  return { ...withStock, stockMoves: moves, sales: b.sales.map((s) => (s.id === id ? next : s)) };
+  const withStock = applySaleStock(b, prev, next, date, false, status === "cancelada" ? "cancelamento" : "devolucao");
+  return { ...withStock, sales: b.sales.map((s) => (s.id === id ? next : s)) };
 }
 
 export const lowStock = (b: BusinessData) =>
