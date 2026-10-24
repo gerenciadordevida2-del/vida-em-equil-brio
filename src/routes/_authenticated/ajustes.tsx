@@ -1,6 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { useRef } from "react";
-import { Download, Upload, Trash2, Smartphone } from "lucide-react";
+import { Download, Upload, Trash2, Smartphone, LogOut } from "lucide-react";
 import { toast } from "sonner";
 import { Page, Card } from "@/components/AppShell";
 import { exportBackup, importBackup, clearAll } from "@/lib/store";
@@ -21,9 +23,25 @@ export const Route = createFileRoute("/_authenticated/ajustes")({
 
 function Ajustes() {
   const fileRef = useRef<HTMLInputElement>(null);
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { user } = Route.useRouteContext();
+  async function signOut() {
+    await queryClient.cancelQueries();
+    queryClient.clear();
+    await supabase.auth.signOut();
+    navigate({ to: "/auth", replace: true });
+  }
   const btn = "flex h-12 w-full items-center justify-center gap-2 rounded-xl font-semibold";
   return (
-    <Page title="Ajustes" subtitle="Seus dados ficam só neste aparelho">
+    <Page title="Ajustes" subtitle="Seus dados ficam salvos na sua conta">
+      <Card className="mb-4 space-y-3">
+        <h2 className="font-semibold">Conta</h2>
+        <p className="text-sm text-muted-foreground">Conectado como {user.email}</p>
+        <button onClick={signOut} className={`${btn} border bg-secondary`}>
+          <LogOut className="h-5 w-5" /> Sair
+        </button>
+      </Card>
       <Card className="mb-4 space-y-3">
         <h2 className="font-semibold">Backup</h2>
         <p className="text-sm text-muted-foreground">
