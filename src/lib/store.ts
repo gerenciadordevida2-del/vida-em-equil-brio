@@ -108,6 +108,7 @@ export type AppData = {
 };
 
 const KEY = "gerenciador-de-vida:v1";
+let cacheKey = KEY;
 
 const empty: AppData = {
   version: 1,
@@ -183,7 +184,7 @@ function setState(next: AppData) {
 
   if (typeof window !== "undefined") {
     try {
-      localStorage.setItem(KEY, JSON.stringify(normalized));
+      localStorage.setItem(cacheKey, JSON.stringify(normalized));
     } catch {
       toast.error(
         "Não foi possível salvar neste aparelho. Libere espaço ou permita o armazenamento e tente novamente.",
@@ -201,12 +202,13 @@ function setState(next: AppData) {
 let sink: ((data: AppData) => void) | null = null;
 
 /** Cloud sync: replaces in-memory/local state with the account's data and routes future saves to `onSave`. */
-export function attachCloud(data: unknown, onSave: (data: AppData) => void) {
+export function attachCloud(userId: string, data: unknown, onSave: (data: AppData) => void) {
+  cacheKey = `${KEY}:user:${userId}`;
   loaded = true;
   loadFailed = false;
   state = normalizeData(data as Partial<AppData>);
   try {
-    localStorage.setItem(KEY, JSON.stringify(state));
+    localStorage.setItem(cacheKey, JSON.stringify(state));
   } catch {
     /* cache only */
   }
@@ -216,6 +218,7 @@ export function attachCloud(data: unknown, onSave: (data: AppData) => void) {
 
 export function detachCloud() {
   sink = null;
+  cacheKey = KEY;
   state = empty;
   loaded = true;
   listeners.forEach((listener) => listener());
