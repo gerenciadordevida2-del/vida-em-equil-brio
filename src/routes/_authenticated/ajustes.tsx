@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { Page, Card } from "@/components/AppShell";
 import { exportBackup, importBackup, clearAll } from "@/lib/store";
 
-export const Route = createFileRoute("/ajustes")({
+export const Route = createFileRoute("/_authenticated/ajustes")({
   head: () => ({
     meta: [
       { title: "Ajustes e backup — Gerenciador de Vida" },

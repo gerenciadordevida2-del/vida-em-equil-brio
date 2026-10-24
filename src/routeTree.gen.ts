@@ -9,50 +9,201 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
+import { Route as AuthenticatedAjustesRouteImport } from './routes/_authenticated/ajustes'
+import { Route as AuthenticatedAssistenteRouteImport } from './routes/_authenticated/assistente'
+import { Route as AuthenticatedFinancasRouteImport } from './routes/_authenticated/financas'
+import { Route as AuthenticatedMetasRouteImport } from './routes/_authenticated/metas'
+import { Route as AuthenticatedRotinaRouteImport } from './routes/_authenticated/rotina'
+import { Route as AuthenticatedTreinosRouteImport } from './routes/_authenticated/treinos'
+import { Route as ApiChatRouteImport } from './routes/api/chat'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
+const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
+  id: '/_authenticated/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedAjustesRoute = AuthenticatedAjustesRouteImport.update({
+  id: '/_authenticated/ajustes',
+  path: '/ajustes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedAssistenteRoute = AuthenticatedAssistenteRouteImport.update({
+  id: '/_authenticated/assistente',
+  path: '/assistente',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedFinancasRoute = AuthenticatedFinancasRouteImport.update({
+  id: '/_authenticated/financas',
+  path: '/financas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedMetasRoute = AuthenticatedMetasRouteImport.update({
+  id: '/_authenticated/metas',
+  path: '/metas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRotinaRoute = AuthenticatedRotinaRouteImport.update({
+  id: '/_authenticated/rotina',
+  path: '/rotina',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedTreinosRoute = AuthenticatedTreinosRouteImport.update({
+  id: '/_authenticated/treinos',
+  path: '/treinos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiChatRoute = ApiChatRouteImport.update({
+  id: '/api/chat',
+  path: '/api/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
+  '/ajustes': typeof AuthenticatedAjustesRoute
+  '/assistente': typeof AuthenticatedAssistenteRoute
+  '/financas': typeof AuthenticatedFinancasRoute
+  '/metas': typeof AuthenticatedMetasRoute
+  '/rotina': typeof AuthenticatedRotinaRoute
+  '/treinos': typeof AuthenticatedTreinosRoute
+  '/api/chat': typeof ApiChatRoute
+  '/': typeof AuthenticatedIndexRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
+  '/ajustes': typeof AuthenticatedAjustesRoute
+  '/assistente': typeof AuthenticatedAssistenteRoute
+  '/financas': typeof AuthenticatedFinancasRoute
+  '/metas': typeof AuthenticatedMetasRoute
+  '/rotina': typeof AuthenticatedRotinaRoute
+  '/treinos': typeof AuthenticatedTreinosRoute
+  '/api/chat': typeof ApiChatRoute
+  '/': typeof AuthenticatedIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
+  '/_authenticated/ajustes': typeof AuthenticatedAjustesRoute
+  '/_authenticated/assistente': typeof AuthenticatedAssistenteRoute
+  '/_authenticated/financas': typeof AuthenticatedFinancasRoute
+  '/_authenticated/metas': typeof AuthenticatedMetasRoute
+  '/_authenticated/rotina': typeof AuthenticatedRotinaRoute
+  '/_authenticated/treinos': typeof AuthenticatedTreinosRoute
+  '/api/chat': typeof ApiChatRoute
+  '/_authenticated/': typeof AuthenticatedIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/ajustes'
+    | '/assistente'
+    | '/financas'
+    | '/metas'
+    | '/rotina'
+    | '/treinos'
+    | '/api/chat'
+    | '/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/ajustes'
+    | '/assistente'
+    | '/financas'
+    | '/metas'
+    | '/rotina'
+    | '/treinos'
+    | '/api/chat'
+    | '/'
+  id:
+    | '__root__'
+    | '/_authenticated/ajustes'
+    | '/_authenticated/assistente'
+    | '/_authenticated/financas'
+    | '/_authenticated/metas'
+    | '/_authenticated/rotina'
+    | '/_authenticated/treinos'
+    | '/api/chat'
+    | '/_authenticated/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
+  AuthenticatedAjustesRoute: typeof AuthenticatedAjustesRoute
+  AuthenticatedAssistenteRoute: typeof AuthenticatedAssistenteRoute
+  AuthenticatedFinancasRoute: typeof AuthenticatedFinancasRoute
+  AuthenticatedMetasRoute: typeof AuthenticatedMetasRoute
+  AuthenticatedRotinaRoute: typeof AuthenticatedRotinaRoute
+  AuthenticatedTreinosRoute: typeof AuthenticatedTreinosRoute
+  ApiChatRoute: typeof ApiChatRoute
+  AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
+    '/_authenticated/': {
+      id: '/_authenticated/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+      preLoaderRoute: typeof AuthenticatedIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/ajustes': {
+      id: '/_authenticated/ajustes'
+      path: '/ajustes'
+      fullPath: '/ajustes'
+      preLoaderRoute: typeof AuthenticatedAjustesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/assistente': {
+      id: '/_authenticated/assistente'
+      path: '/assistente'
+      fullPath: '/assistente'
+      preLoaderRoute: typeof AuthenticatedAssistenteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/financas': {
+      id: '/_authenticated/financas'
+      path: '/financas'
+      fullPath: '/financas'
+      preLoaderRoute: typeof AuthenticatedFinancasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/metas': {
+      id: '/_authenticated/metas'
+      path: '/metas'
+      fullPath: '/metas'
+      preLoaderRoute: typeof AuthenticatedMetasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/rotina': {
+      id: '/_authenticated/rotina'
+      path: '/rotina'
+      fullPath: '/rotina'
+      preLoaderRoute: typeof AuthenticatedRotinaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/treinos': {
+      id: '/_authenticated/treinos'
+      path: '/treinos'
+      fullPath: '/treinos'
+      preLoaderRoute: typeof AuthenticatedTreinosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/chat': {
+      id: '/api/chat'
+      path: '/api/chat'
+      fullPath: '/api/chat'
+      preLoaderRoute: typeof ApiChatRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
+  AuthenticatedAjustesRoute: AuthenticatedAjustesRoute,
+  AuthenticatedAssistenteRoute: AuthenticatedAssistenteRoute,
+  AuthenticatedFinancasRoute: AuthenticatedFinancasRoute,
+  AuthenticatedMetasRoute: AuthenticatedMetasRoute,
+  AuthenticatedRotinaRoute: AuthenticatedRotinaRoute,
+  AuthenticatedTreinosRoute: AuthenticatedTreinosRoute,
+  ApiChatRoute: ApiChatRoute,
+  AuthenticatedIndexRoute: AuthenticatedIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

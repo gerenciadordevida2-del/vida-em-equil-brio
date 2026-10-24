@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Financas } from "@/routes/financas";
 
-export const Route = createFileRoute("/metas")({
+export const Route = createFileRoute("/_authenticated/metas")({
   head: () => ({
     meta: [
       { title: "Metas — Gerenciador de Vida" },

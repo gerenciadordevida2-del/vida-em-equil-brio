@@ -14,7 +14,7 @@ import { Page, Card } from "@/components/AppShell";
 import { useData, today } from "@/lib/store";
 import { prepareAction, buildSnapshot } from "@/lib/ai-actions";
 
-export const Route = createFileRoute("/assistente")({
+export const Route = createFileRoute("/_authenticated/assistente")({
   head: () => ({
     meta: [
       { title: "Assistente de IA — Gerenciador de Vida" },

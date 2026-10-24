@@ -11,7 +11,7 @@ import { ChartsTab } from "@/components/ChartsTab";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useData, update, uid, today, brl, fmtDate } from "@/lib/store";
 
-export const Route = createFileRoute("/financas")({
+export const Route = createFileRoute("/_authenticated/financas")({
   head: () => ({
     meta: [
       { title: "Finanças — Gerenciador de Vida" },

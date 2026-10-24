@@ -5,7 +5,7 @@ import { Page, Card } from "@/components/AppShell";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useData, update, uid, today, type Task, type Priority } from "@/lib/store";
 
-export const Route = createFileRoute("/rotina")({
+export const Route = createFileRoute("/_authenticated/rotina")({
   head: () => ({
     meta: [
       { title: "Rotina — Gerenciador de Vida" },

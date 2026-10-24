@@ -26,7 +26,7 @@ import { Button } from "@/components/ui/button";
 import { dailyScore, toggleHabitDate } from "@/lib/home-metrics";
 import { useData, update, uid, today, brl, fmtDate } from "@/lib/store";
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/_authenticated/")({
   head: () => ({
     meta: [
       { title: "Início — Gerenciador de Vida" },

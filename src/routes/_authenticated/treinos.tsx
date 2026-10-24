@@ -26,7 +26,7 @@ import {
   type HealthGoal,
 } from "@/lib/store";
 
-export const Route = createFileRoute("/treinos")({
+export const Route = createFileRoute("/_authenticated/treinos")({
   head: () => ({
     meta: [
       { title: "Treinos — Gerenciador de Vida" },
