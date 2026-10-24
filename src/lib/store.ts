@@ -193,9 +193,49 @@ function setState(next: AppData) {
   }
   state = normalized;
   loadFailed = false;
+  sink?.(normalized);
 
   listeners.forEach((listener) => listener());
 }
+
+let sink: ((data: AppData) => void) | null = null;
+
+/** Cloud sync: replaces in-memory/local state with the account's data and routes future saves to `onSave`. */
+export function attachCloud(data: unknown, onSave: (data: AppData) => void) {
+  loaded = true;
+  loadFailed = false;
+  state = normalizeData(data as Partial<AppData>);
+  try {
+    localStorage.setItem(KEY, JSON.stringify(state));
+  } catch {
+    /* cache only */
+  }
+  sink = onSave;
+  listeners.forEach((listener) => listener());
+}
+
+export function detachCloud() {
+  sink = null;
+  state = empty;
+  loaded = true;
+  listeners.forEach((listener) => listener());
+}
+
+/** Reads the device's legacy (pre-login) data, or null when absent/invalid. Never deletes it. */
+export function readLegacyLocal(): AppData | null {
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (!raw) return null;
+    const parsed: unknown = JSON.parse(raw);
+    if (!backupSchema.safeParse(parsed).success) return null;
+    return normalizeData(parsed as Partial<AppData>);
+  } catch {
+    return null;
+  }
+}
+
+export const LEGACY_KEY = KEY;
+export const emptyData = (): AppData => normalizeData(null);
 
 export function update(fn: (data: AppData) => AppData) {
   load();
