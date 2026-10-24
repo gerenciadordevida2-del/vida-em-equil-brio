@@ -16,7 +16,43 @@ export type Sale = {
   payments: Movement[];
   expectedDate?: string | undefined;
   notes?: string | undefined;
+  /** Links to commerce records (optional so legacy sales stay valid). */
+  customerId?: string | undefined;
+  productId?: string | undefined;
+  /** Cancelled/returned sales stay in history but leave every total and the stock. */
+  status?: "cancelada" | "devolvida" | undefined;
 };
+
+export type Customer = {
+  id: string;
+  name: string;
+  phone?: string | undefined;
+  notes?: string | undefined;
+  archived?: boolean | undefined;
+  createdAt: string;
+};
+
+export type Product = {
+  id: string;
+  name: string;
+  price: number;
+  cost?: number | undefined;
+  quantity: number;
+  minStock: number;
+  archived?: boolean | undefined;
+  createdAt: string;
+};
+
+export type StockMove = {
+  id: string;
+  productId: string;
+  date: string;
+  delta: number;
+  reason: "venda" | "edicao" | "cancelamento" | "devolucao" | "ajuste" | "exclusao";
+  saleId?: string | undefined;
+};
+
+export type ReminderLog = { id: string; saleId: string; dueDate: string; sentAt: string; channel: "whatsapp-manual" };
 
 export type BizExpense = {
   id: string;
@@ -50,7 +86,13 @@ export type BusinessData = {
   expenses: BizExpense[];
   scheduled: ScheduledPayment[];
   stock?: DailyStock | undefined;
+  customers?: Customer[] | undefined;
+  products?: Product[] | undefined;
+  stockMoves?: StockMove[] | undefined;
+  reminders?: ReminderLog[] | undefined;
 };
+
+export const isActiveSale = (s: Sale) => !s.status;
 
 export const emptyBusiness = (): BusinessData => ({ sales: [], expenses: [], scheduled: [] });
 
@@ -115,7 +157,7 @@ export function monthPeriod(ym: string): Period {
 }
 
 export function businessMetrics(b: BusinessData, p: Period) {
-  const sales = b.sales.filter((s) => inP(s.date, p));
+  const sales = b.sales.filter((s) => isActiveSale(s) && inP(s.date, p));
   const expenses = b.expenses.filter((e) => inP(e.date, p));
   const totalSalesC = sumC(sales.map(saleTotal));
   const receivedOfSalesC = sumC(sales.map(paidOf));
@@ -126,7 +168,7 @@ export function businessMetrics(b: BusinessData, p: Period) {
   const payablesC = sumC(payablesInP.map((s) => s.amount));
 
   const toReceiveC =
-    sumC(b.sales.map((s) => remaining(saleTotal(s), s))) +
+    sumC(b.sales.filter(isActiveSale).map((s) => remaining(saleTotal(s), s))) +
     sumC(b.scheduled.filter((s) => s.kind === "receber").map((s) => remaining(s.amount, s)));
   const toPayC =
     sumC(b.expenses.filter((e) => !e.paid).map((e) => e.amount)) +
@@ -135,7 +177,7 @@ export function businessMetrics(b: BusinessData, p: Period) {
   // Cash: only effective movements dated inside the period.
   const movIn = (ms: Movement[]) => sumC(ms.filter((m) => inP(m.date, p)).map((m) => m.amount));
   const cashInC =
-    b.sales.reduce((s, x) => s + movIn(x.payments), 0) +
+    b.sales.filter(isActiveSale).reduce((s, x) => s + movIn(x.payments), 0) +
     b.scheduled.filter((s) => s.kind === "receber").reduce((s, x) => s + movIn(x.payments), 0);
   const cashOutC =
     sumC(b.expenses.filter((e) => e.paid && inP(e.paidDate ?? e.date, p)).map((e) => e.amount)) +
@@ -182,7 +224,7 @@ export type AgendaItem = ScheduledPayment & { saleId?: string };
  * receivables. They are not stored twice, so totals are never double counted. */
 export function agendaItems(b: BusinessData): AgendaItem[] {
   const fromSales: AgendaItem[] = b.sales
-    .filter((s) => s.expectedDate && remaining(saleTotal(s), s) > 0)
+    .filter((s) => isActiveSale(s) && s.expectedDate && remaining(saleTotal(s), s) > 0)
     .map((s) => ({
       id: `sale-${s.id}`,
       saleId: s.id,
@@ -204,7 +246,7 @@ export function businessDueOn(b: BusinessData, day: string): AgendaItem[] {
 /** Units sold on a given day: sum of the quantities of that day's sales.
  * Computed from the sales themselves, so edits and deletes are never double counted. */
 export function soldOn(b: BusinessData, day: string): number {
-  return b.sales.filter((s) => s.date === day).reduce((sum, s) => sum + s.quantity, 0);
+  return b.sales.filter((s) => isActiveSale(s) && s.date === day).reduce((sum, s) => sum + s.quantity, 0);
 }
 
 /** Daily stock state for the given day, or null when no initial quantity was set for it. */

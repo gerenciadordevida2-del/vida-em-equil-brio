@@ -106,7 +106,7 @@ describe("Negócio — armazenamento", () => {
     const { importBackup } = await import("@/lib/store");
     await importBackup({ size: 10, text: async () => JSON.stringify({ version: 1, transactions: [] }) } as File);
     const saved = JSON.parse(localStorage.getItem("gerenciador-de-vida:v1")!);
-    expect(saved.business).toEqual({ sales: [], expenses: [], scheduled: [] });
+    expect(saved.business).toMatchObject({ sales: [], expenses: [], scheduled: [] });
     expect(saved.version).toBe(1);
   });
   it("venda salva permanece após recarregar e não duplica ao editar", async () => {

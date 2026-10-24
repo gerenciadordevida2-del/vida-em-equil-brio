@@ -19,10 +19,11 @@ describe("App routing", () => {
       "/assistente",
       "/ajustes",
       "/api/chat",
+      "/auth",
     ]) {
       const matches = router.matchRoutes(path);
       expect(matches.at(-1)?.routeId).not.toBe(rootRouteId);
-      expect(matches.at(-1)?.routeId).toBe(path);
+      expect([path, `/_authenticated${path}`]).toContain(matches.at(-1)?.routeId);
     }
   });
 });

@@ -8,6 +8,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { money, roundMoney } from "@/lib/data-validation";
 import { ensureReminderFor } from "@/lib/notifications";
 import { brl, fmtDate, today, uid, update, useData } from "@/lib/store";
+import { changeSaleStatus, deleteSale, saveSale } from "@/lib/commerce";
+import { CustomerPicker, CustomersSection, ProductSelect, ProductsSection, SalesCharts, WhatsAppButton } from "@/components/CommerceSections";
 import {
   BIZ_CATEGORIES,
   PAYMENT_METHODS,
@@ -38,7 +40,7 @@ const field =
 const area = "w-full rounded-xl border bg-input/40 p-3 text-base outline-none focus:border-primary";
 const COLORS = ["var(--chart-1)", "var(--chart-2)", "var(--chart-3)", "var(--chart-4)", "var(--chart-5)"];
 
-type Section = "painel" | "vendas" | "agenda" | "gastos";
+type Section = "painel" | "vendas" | "clientes" | "produtos" | "agenda" | "gastos";
 
 function setBiz(fn: (b: BusinessData) => BusinessData) {
   try {
@@ -198,13 +200,15 @@ export function BusinessTab() {
   const sections: [Section, string][] = [
     ["painel", "Painel"],
     ["vendas", "Vendas"],
+    ["clientes", "Clientes"],
+    ["produtos", "Produtos"],
     ["agenda", "Agendados"],
     ["gastos", "Gastos"],
   ];
 
   return (
     <div>
-      <div className="mb-3 grid grid-cols-4 gap-1 rounded-xl border p-1">
+      <div className="mb-3 grid grid-cols-3 gap-1 rounded-xl border p-1">
         {sections.map(([k, l]) => (
           <button key={k} type="button" onClick={() => setSection(k)}
             className={`rounded-lg py-2 text-xs font-semibold ${section === k ? "bg-secondary text-foreground" : "text-muted-foreground"}`}>
@@ -245,6 +249,7 @@ export function BusinessTab() {
               Só conta dinheiro efetivamente recebido ou pago. Vendas pendentes não entram.
             </p>
           </Card>
+          <SalesCharts b={b} />
           <Card>
             <h2 className="mb-2 font-semibold">Gastos por categoria</h2>
             {pie.length === 0 ? (
@@ -285,6 +290,8 @@ export function BusinessTab() {
       )}
 
       {section === "vendas" && <SalesSection sales={b.sales} />}
+      {section === "clientes" && <CustomersSection />}
+      {section === "produtos" && <ProductsSection />}
       {section === "agenda" && <ScheduleSection items={agendaItems(b)} />}
       {section === "gastos" && <ExpensesSection expenses={b.expenses} />}
     </div>
@@ -337,6 +344,18 @@ function SalesSection({ sales }: { sales: Sale[] }) {
             const total = saleTotal(s);
             const st = statusOf(total, s);
             const pr = saleProfit(s);
+            if (s.status)
+              return (
+                <li key={s.id} className="py-3 opacity-60">
+                  <div className="flex items-start gap-2">
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-medium line-through">{s.product} · {s.quantity}x</p>
+                      <p className="text-xs text-muted-foreground">{s.customer} · {fmtDate(s.date)} · {s.status === "cancelada" ? "Cancelada" : "Devolvida"}</p>
+                    </div>
+                    <span className="font-semibold line-through">{brl(total)}</span>
+                  </div>
+                </li>
+              );
             return (
               <li key={s.id} className="py-3">
                 <div className="flex items-start gap-2">
@@ -354,6 +373,17 @@ function SalesSection({ sales }: { sales: Sale[] }) {
                   <span className="font-semibold">{brl(total)}</span>
                 </div>
                 <div className="mt-2 flex items-center justify-end gap-4">
+                  <WhatsAppButton sale={s} />
+                  <select aria-label="Cancelar ou devolver" value="" className="bg-transparent text-xs text-muted-foreground"
+                    onChange={(e) => {
+                      const v = e.target.value as "cancelada" | "devolvida";
+                      if (v && confirm(v === "cancelada" ? "Cancelar esta venda? O estoque será devolvido." : "Registrar devolução? O estoque será devolvido."))
+                        if (setBiz((b) => changeSaleStatus(b, s.id, v, today()))) toast.success(v === "cancelada" ? "Venda cancelada." : "Devolução registrada.");
+                    }}>
+                    <option value="">Mais…</option>
+                    <option value="cancelada">Cancelar</option>
+                    <option value="devolvida">Devolução</option>
+                  </select>
                   {st !== "pago" && (
                     <button type="button" className="flex items-center gap-1 text-xs font-semibold text-primary" onClick={() => setPaying(s)}>
                       <HandCoins className="h-4 w-4" /> Receber
@@ -362,7 +392,7 @@ function SalesSection({ sales }: { sales: Sale[] }) {
                   <button type="button" aria-label="Editar" className="text-muted-foreground" onClick={() => setEditing(s)}>
                     <Pencil className="h-4 w-4" />
                   </button>
-                  <Del label="Excluir esta venda?" onConfirm={() => setBiz((b) => ({ ...b, sales: b.sales.filter((x) => x.id !== s.id) }))} />
+                  <Del label="Excluir esta venda?" onConfirm={() => setBiz((b) => deleteSale(b, s.id, today()))} />
                 </div>
               </li>
             );
@@ -393,6 +423,10 @@ function SaleDialog({ sale, onClose }: { sale: Sale | null; onClose: () => void 
   const [disc, setDisc] = useState(sale?.discount ? String(sale.discount).replace(".", ",") : "");
   const [status, setStatus] = useState(initialStatus);
   const [partial, setPartial] = useState(sale && initialStatus === "parcial" ? String(paidOf(sale)).replace(".", ",") : "");
+  const [customerId, setCustomerId] = useState<string | undefined>(sale?.customerId);
+  const [customerName, setCustomerName] = useState(sale?.customer ?? "");
+  const [productId, setProductId] = useState<string | undefined>(sale?.productId);
+  const [productName, setProductName] = useState(sale?.product ?? "");
 
   const q = Number(qty.replace(",", "."));
   const preview = {
@@ -407,8 +441,8 @@ function SaleDialog({ sale, onClose }: { sale: Sale | null; onClose: () => void 
   function submit(e: React.FormEvent<HTMLFormElement>): void {
     e.preventDefault();
     const f = new FormData(e.currentTarget);
-    const customer = String(f.get("customer")).trim();
-    const product = String(f.get("product")).trim();
+    const customer = customerName.trim();
+    const product = productName.trim();
     const date = String(f.get("date"));
     const unitPrice = roundMoney(money(price));
     const discount = disc.trim() ? roundMoney(money(disc)) : 0;
@@ -426,6 +460,8 @@ function SaleDialog({ sale, onClose }: { sale: Sale | null; onClose: () => void 
     const next: Sale = {
       id: sale?.id ?? uid(),
       customer, product, quantity: q, unitPrice, discount, date,
+      ...(customerId ? { customerId } : {}),
+      ...(productId ? { productId } : {}),
       paymentMethod: String(f.get("method")),
       payments,
       ...(unitCost !== undefined ? { unitCost } : {}),
@@ -433,11 +469,8 @@ function SaleDialog({ sale, onClose }: { sale: Sale | null; onClose: () => void 
       ...(String(f.get("notes")).trim() ? { notes: String(f.get("notes")).trim() } : {}),
     };
     const ok = setBiz((b) => {
-      if (!sale && date === today()) assertStockAvailable(b, date, q);
-      return {
-        ...b,
-        sales: sale ? b.sales.map((x) => (x.id === sale.id ? next : x)) : [...b.sales, next],
-      };
+      if (!sale && date === today() && !productId) assertStockAvailable(b, date, q);
+      return saveSale(b, next, today());
     });
     if (ok) {
       const linked = status !== "pago" && next.expectedDate;
@@ -454,8 +487,19 @@ function SaleDialog({ sale, onClose }: { sale: Sale | null; onClose: () => void 
       <DialogContent className="max-h-[90vh] max-w-[92vw] overflow-y-auto rounded-2xl sm:max-w-md">
         <DialogHeader><DialogTitle>{sale ? "Editar venda" : "Registrar venda"}</DialogTitle></DialogHeader>
         <form onSubmit={submit} className="space-y-3">
-          <input name="customer" placeholder="Cliente ou comprador" defaultValue={sale?.customer} className={field} />
-          <input name="product" placeholder="Produto ou serviço" defaultValue={sale?.product} className={field} />
+          <CustomerPicker value={customerId} onChange={(c) => { setCustomerId(c.id); setCustomerName(c.name); }} />
+          {!customerId && (
+            <input placeholder="Ou digite só o nome (sem cadastro)" value={customerName} onChange={(e) => setCustomerName(e.target.value)} className={field} aria-label="Nome do cliente sem cadastro" />
+          )}
+          <ProductSelect value={productId} onChange={(p) => {
+            setProductId(p?.id);
+            if (p) {
+              setProductName(p.name);
+              setPrice(String(p.price).replace(".", ","));
+              setCost(p.cost !== undefined ? String(p.cost).replace(".", ",") : "");
+            }
+          }} />
+          <input placeholder="Produto ou serviço" value={productName} onChange={(e) => setProductName(e.target.value)} readOnly={!!productId} className={field} aria-label="Produto" />
           <div className="grid grid-cols-2 gap-2">
             <label className="text-xs text-muted-foreground">Quantidade
               <input inputMode="decimal" value={qty} onChange={(e) => setQty(e.target.value)} className={field} /></label>

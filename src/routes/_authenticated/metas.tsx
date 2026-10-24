@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Financas } from "@/routes/financas";
+import { Financas } from "@/routes/_authenticated/financas";
 
 export const Route = createFileRoute("/_authenticated/metas")({
   head: () => ({
