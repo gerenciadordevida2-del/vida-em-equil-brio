@@ -48,6 +48,10 @@ export const Route = createFileRoute("/_authenticated/")({
 
 function Index() {
   const data = useData();
+  const { user } = Route.useRouteContext();
+  const meta = user.user_metadata as { full_name?: string; name?: string } | undefined;
+  const fullName = meta?.full_name || meta?.name || user.email?.split("@")[0] || "";
+  const firstName = fullName.split(" ")[0] || "você";
   const t = today();
   const month = t.slice(0, 7);
 
@@ -140,11 +144,11 @@ function Index() {
             className="h-12 w-12 shrink-0 rounded-full border border-primary/25 bg-accent p-0 font-display text-lg text-primary"
           >
             <Link to="/ajustes" aria-label="Perfil e ajustes">
-              D
+              {firstName.charAt(0).toUpperCase()}
             </Link>
           </Button>
           <div className="min-w-0">
-            <p className="text-xs text-muted-foreground">{greet}, Dieguin</p>
+            <p className="text-xs text-muted-foreground">{greet}, {firstName}</p>
             <h1 className="mt-1 text-xl font-semibold">Seu dia, em equilíbrio.</h1>
           </div>
         </div>
