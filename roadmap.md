@@ -15,8 +15,10 @@
 - [ ] Verificar vínculo e branch oficiais do GitHub e proteção compartilhada da Vercel: depende de acesso externo.
 - [ ] Reavaliar segurança com análise profunda recente: depende de nova análise na aba Segurança.
 - [x] Aba Negócio em Finanças (vendas, agendados, gastos, painel, gráfico)
-- [ ] Integrar clientes, produtos, estoque e cancelamento sem duplicar registros.
-- [ ] Atualizar indicadores comerciais e gráficos com dados reais.
-- [ ] Google, perfis, rotas privadas e dados isolados; preservar backup local legado.
-- [ ] Lembretes individuais pelo WhatsApp; automação somente com integração oficial.
+- [x] Integrar clientes, produtos, estoque e cancelamento sem duplicar registros.
+- [x] Atualizar indicadores comerciais e gráficos com dados reais.
+- [x] Google, perfis, rotas privadas e dados isolados; preservar backup local legado. (falta ativar Google no Supabase)
+- [x] Lembretes manuais pelo WhatsApp.
+- [ ] Envio automático: depende da API oficial do WhatsApp Business e credenciais.
+- [ ] Assistente IA: depende da chave GERENCIADOR_DE_VIDA_API_KEY neste projeto.
 - [ ] Testar regras, persistência, isolamento e navegação móvel; relatar bloqueios reais.
