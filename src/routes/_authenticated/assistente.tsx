@@ -1,3 +1,4 @@
+import { supabase } from "@/integrations/supabase/client";
 import { createFileRoute } from "@tanstack/react-router";
 import { useChat } from "@ai-sdk/react";
 import {
@@ -49,7 +50,10 @@ function Assistente() {
         api: "/api/chat",
         fetch: async (url, options) => {
           try {
-            const response = await fetch(url, options);
+            const { data: sess } = await supabase.auth.getSession();
+            const headers = new Headers(options?.headers);
+            if (sess.session) headers.set("Authorization", `Bearer ${sess.session.access_token}`);
+            const response = await fetch(url, { ...options, headers });
             
             // Trata erros HTTP como 429 (Too Many Requests), 503 ou mensagens de alta demanda
             if (!response.ok) {
