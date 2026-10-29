@@ -24,7 +24,7 @@ export function UpgradeCard({ feature }: { feature: string }) {
       <Crown className="mx-auto h-8 w-8 text-primary" />
       <h2 className="mt-3 font-display text-lg font-semibold">{feature} é um recurso VIP</h2>
       <p className="mt-2 text-sm text-muted-foreground">Seus dados continuam guardados. Ative o VIP ou o teste grátis de 7 dias para usar este recurso.</p>
-      <Link to="/planos" className="mt-4 inline-flex rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground">
+      <Link to="/ajustes" className="mt-4 inline-flex rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground">
         Ver planos
       </Link>
     </div>
