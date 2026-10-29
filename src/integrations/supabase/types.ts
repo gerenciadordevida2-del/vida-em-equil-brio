@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_audit_log: {
+        Row: {
+          action: string
+          actor_id: string | null
+          created_at: string
+          details: Json
+          id: string
+          target_user_id: string | null
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          created_at?: string
+          details?: Json
+          id?: string
+          target_user_id?: string | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          created_at?: string
+          details?: Json
+          id?: string
+          target_user_id?: string | null
+        }
+        Relationships: []
+      }
       app_data: {
         Row: {
           data: Json
@@ -43,6 +70,178 @@ export type Database = {
           },
         ]
       }
+      orders: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          currency: string
+          external_reference: string
+          id: string
+          plan_id: string
+          preference_id: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string
+          currency?: string
+          external_reference: string
+          id?: string
+          plan_id: string
+          preference_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          currency?: string
+          external_reference?: string
+          id?: string
+          plan_id?: string
+          preference_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payment_events: {
+        Row: {
+          id: string
+          received_at: string
+          request_id: string | null
+          resource_id: string | null
+          result: string | null
+          signature_valid: boolean
+          topic: string | null
+        }
+        Insert: {
+          id?: string
+          received_at?: string
+          request_id?: string | null
+          resource_id?: string | null
+          result?: string | null
+          signature_valid: boolean
+          topic?: string | null
+        }
+        Update: {
+          id?: string
+          received_at?: string
+          request_id?: string | null
+          resource_id?: string | null
+          result?: string | null
+          signature_valid?: boolean
+          topic?: string | null
+        }
+        Relationships: []
+      }
+      payments: {
+        Row: {
+          amount_cents: number
+          approved_at: string | null
+          created_at: string
+          currency: string
+          fee_cents: number | null
+          history: Json
+          id: string
+          net_cents: number | null
+          order_id: string | null
+          plan_id: string | null
+          provider_payment_id: string
+          status: string
+          status_detail: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount_cents: number
+          approved_at?: string | null
+          created_at?: string
+          currency: string
+          fee_cents?: number | null
+          history?: Json
+          id?: string
+          net_cents?: number | null
+          order_id?: string | null
+          plan_id?: string | null
+          provider_payment_id: string
+          status: string
+          status_detail?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount_cents?: number
+          approved_at?: string | null
+          created_at?: string
+          currency?: string
+          fee_cents?: number | null
+          history?: Json
+          id?: string
+          net_cents?: number | null
+          order_id?: string | null
+          plan_id?: string | null
+          provider_payment_id?: string
+          status?: string
+          status_detail?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      plans: {
+        Row: {
+          active: boolean
+          created_at: string
+          currency: string
+          id: string
+          name: string
+          period_days: number | null
+          price_cents: number | null
+          sort: number
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          currency?: string
+          id: string
+          name: string
+          period_days?: number | null
+          price_cents?: number | null
+          sort?: number
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          currency?: string
+          id?: string
+          name?: string
+          period_days?: number | null
+          price_cents?: number | null
+          sort?: number
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -67,18 +266,99 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      vip_grants: {
+        Row: {
+          created_at: string
+          ends_at: string | null
+          granted_by: string | null
+          id: string
+          payment_id: string | null
+          reason: string | null
+          revoke_reason: string | null
+          revoked_at: string | null
+          revoked_by: string | null
+          source: string
+          starts_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          ends_at?: string | null
+          granted_by?: string | null
+          id?: string
+          payment_id?: string | null
+          reason?: string | null
+          revoke_reason?: string | null
+          revoked_at?: string | null
+          revoked_by?: string | null
+          source: string
+          starts_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          ends_at?: string | null
+          granted_by?: string | null
+          id?: string
+          payment_id?: string | null
+          reason?: string | null
+          revoke_reason?: string | null
+          revoked_at?: string | null
+          revoked_by?: string | null
+          source?: string
+          starts_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vip_grants_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: true
+            referencedRelation: "payments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       save_app_data: {
         Args: { expected_revision: number; payload: Json }
         Returns: number
       }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -205,6 +485,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin"],
+    },
   },
 } as const
