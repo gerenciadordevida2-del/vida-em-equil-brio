@@ -176,7 +176,7 @@ export const adminHistory = createServerFn({ method: "POST" })
     const { data } = await db.from("admin_audit_log").select("*").order("created_at", { ascending: false }).limit(300);
     const { data: list } = await db.auth.admin.listUsers({ perPage: 1000 });
     const email = (id: string | null) => (id ? (list?.users.find((u) => u.id === id)?.email ?? id.slice(0, 8)) : "Sistema");
-    return (data ?? []).map((r) => ({ id: r.id, action: r.action, at: r.created_at, actor: email(r.actor_id), target: email(r.target_user_id), details: r.details as Record<string, unknown> }));
+    return (data ?? []).map((r) => ({ id: r.id, action: r.action, at: r.created_at, actor: email(r.actor_id), target: email(r.target_user_id), details: JSON.stringify(r.details ?? {}) }));
   });
 
 export const ownerSales = createServerFn({ method: "POST" })
