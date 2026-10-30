@@ -11,3 +11,16 @@ describe("salesSummary", () => {
     expect(salesSummary([r("approved", 1990, null)]).net).toBeNull();
   });
 });
+
+import { validatePlanPrice } from "@/lib/billing";
+describe("validatePlanPrice", () => {
+  it("blocks enabling checkout without a price", () => {
+    expect(validatePlanPrice({ price_cents: null, period_days: 30, active: true })).not.toBeNull();
+  });
+  it("rejects prices below R$ 1,00", () => {
+    expect(validatePlanPrice({ price_cents: 50, period_days: 30, active: false })).not.toBeNull();
+  });
+  it("accepts a valid enabled price", () => {
+    expect(validatePlanPrice({ price_cents: 1990, period_days: 30, active: true })).toBeNull();
+  });
+});

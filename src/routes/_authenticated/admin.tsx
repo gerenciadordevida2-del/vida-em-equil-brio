@@ -6,6 +6,7 @@ import { ShieldAlert } from "lucide-react";
 import { Page, Card } from "@/components/AppShell";
 import { useAccess } from "@/lib/access";
 import { ownerSales } from "@/lib/billing.functions";
+import { PlansEditor } from "@/components/PlansEditor";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({
@@ -58,6 +59,7 @@ function Sales({ plans }: { plans: { id: string; name: string }[] }) {
 
   return (
     <Page title="Administração" subtitle="Vendas reais confirmadas pelo Mercado Pago">
+      <PlansEditor />
       <Card className="mb-4 grid grid-cols-2 gap-2">
         <label className="text-xs text-muted-foreground">De<input type="date" className={`${input} w-full`} value={f.from} onChange={(e) => setF({ ...f, from: e.target.value })} /></label>
         <label className="text-xs text-muted-foreground">Até<input type="date" className={`${input} w-full`} value={f.to} onChange={(e) => setF({ ...f, to: e.target.value })} /></label>
