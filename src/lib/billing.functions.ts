@@ -231,6 +231,7 @@ export const ownerUpdatePlan = createServerFn({ method: "POST" })
     const db = await admin();
     const { data: plan } = await db.from("plans").select("id, price_cents, period_days, active").eq("id", data.id).maybeSingle();
     if (!plan) throw new Error("Plano não encontrado.");
+    if (!plan.period_days) throw new Error("O plano gratuito não tem preço.");
     const err = validatePlanPrice({ price_cents: data.price_cents, period_days: plan.period_days, active: data.active });
     if (err) throw new Error(err);
     const { error } = await db.from("plans").update({ price_cents: data.price_cents, active: data.active }).eq("id", data.id);
