@@ -1,4 +1,5 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { useAccess } from "@/lib/access";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useRef } from "react";
@@ -38,6 +39,7 @@ function Ajustes() {
       <Card className="mb-4 space-y-3">
         <h2 className="font-semibold">Conta</h2>
         <p className="text-sm text-muted-foreground">Conectado como {user.email}</p>
+        <OwnerLink />
         <button onClick={signOut} className={`${btn} border bg-secondary`}>
           <LogOut className="h-5 w-5" /> Sair
         </button>
@@ -100,5 +102,15 @@ function Ajustes() {
         </button>
       </Card>
     </Page>
+  );
+}
+
+function OwnerLink() {
+  const { data } = useAccess();
+  if (!data?.isOwner) return null;
+  return (
+    <Link to="/admin" className="flex h-12 w-full items-center justify-center rounded-xl border bg-secondary font-semibold">
+      Administração (proprietário)
+    </Link>
   );
 }
