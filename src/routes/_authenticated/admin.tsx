@@ -133,7 +133,7 @@ function Sales({ plans }: { plans: { id: string; name: string }[] }) {
   );
 }
 
-function Stat({ label, value, hint }: { label: string; value: string; hint?: string }) {
+function Stat({ label, value, hint }: { label: string; value: string; hint?: string | undefined }) {
   return (
     <Card>
       <p className="text-xs text-muted-foreground">{label}</p>

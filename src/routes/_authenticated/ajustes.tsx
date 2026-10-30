@@ -103,3 +103,13 @@ function Ajustes() {
     </Page>
   );
 }
+
+function OwnerLink() {
+  const { data } = useAccess();
+  if (!data?.isOwner) return null;
+  return (
+    <Link to="/admin" className="flex h-12 w-full items-center justify-center rounded-xl border bg-secondary font-semibold">
+      Administração (proprietário)
+    </Link>
+  );
+}
