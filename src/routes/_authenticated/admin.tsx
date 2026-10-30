@@ -78,10 +78,10 @@ function Sales({ plans }: { plans: { id: string; name: string }[] }) {
           <div className="mb-4 grid grid-cols-2 gap-2">
             <Stat label="Receita bruta recebida" value={brl(data.summary.gross)} />
             <Stat label="Receita líquida" value={data.summary.net == null ? "Não calculada" : brl(data.summary.net)} hint={data.summary.net == null ? "Tarifa não informada pelo Mercado Pago" : undefined} />
-            <Stat label="Aprovados" value={String(data.summary.counts.approved ?? 0)} />
-            <Stat label="Pendentes (fora da receita)" value={String(data.summary.counts.pending ?? 0)} />
-            <Stat label="Recusados/cancelados" value={String(data.summary.counts.rejected ?? 0)} />
-            <Stat label="Reembolsos/estornos" value={String(data.summary.counts.refunded ?? 0)} />
+            <Stat label="Aprovados" value={String(data.summary.counts["approved"] ?? 0)} />
+            <Stat label="Pendentes (fora da receita)" value={String(data.summary.counts["pending"] ?? 0)} />
+            <Stat label="Recusados/cancelados" value={String(data.summary.counts["rejected"] ?? 0)} />
+            <Stat label="Reembolsos/estornos" value={String(data.summary.counts["refunded"] ?? 0)} />
             <Stat label="Assinaturas ativas" value={String(data.subs.active)} />
             <Stat label="Vencidas / canceladas" value={`${data.subs.expired} / ${data.subs.cancelled}`} />
             <Stat label="Clientes pagantes" value={String(data.payingCustomers)} />
