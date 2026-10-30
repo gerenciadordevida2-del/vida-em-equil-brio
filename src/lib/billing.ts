@@ -132,3 +132,12 @@ export function salesSummary(rows: PaymentRow[]) {
   }
   return { counts, gross, net: netKnown ? net : null, byPlan, byDay };
 }
+
+/** Owner-entered plan price check before enabling checkout. Returns an error message or null. */
+export function validatePlanPrice(p: { price_cents: number | null; period_days: number; active: boolean }): string | null {
+  if (p.price_cents !== null && (!Number.isInteger(p.price_cents) || p.price_cents < 100 || p.price_cents > 1_000_000))
+    return "O preço deve ficar entre R$ 1,00 e R$ 10.000,00.";
+  if (!Number.isInteger(p.period_days) || p.period_days < 1 || p.period_days > 3660) return "Período inválido.";
+  if (p.active && !p.price_cents) return "Defina um preço antes de habilitar a cobrança.";
+  return null;
+}

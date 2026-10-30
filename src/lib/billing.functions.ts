@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { salesSummary, trialWindow, vipUntil, isGrantActive } from "./billing";
+import { salesSummary, trialWindow, vipUntil, isGrantActive, validatePlanPrice } from "./billing";
 import { admin, audit, getAccessFor, mpFetch, ownerId, APP_URL_FALLBACK } from "./billing.server";
 
 export const getMyAccess = createServerFn({ method: "POST" })
@@ -210,4 +210,31 @@ export const ownerSales = createServerFn({ method: "POST" })
       renewed,
       transactions: (pays ?? []).slice(0, 200),
     };
+  });
+
+export const ownerListPlans = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    if (ownerId() !== context.userId) throw new Error("Acesso negado");
+    const db = await admin();
+    const { data } = await db.from("plans").select("id, name, price_cents, currency, period_days, active").order("sort");
+    return data ?? [];
+  });
+
+export const ownerUpdatePlan = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) =>
+    z.object({ id: z.string().max(40), price_cents: z.number().int().nullable(), active: z.boolean() }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    if (ownerId() !== context.userId) throw new Error("Acesso negado");
+    const db = await admin();
+    const { data: plan } = await db.from("plans").select("id, price_cents, period_days, active").eq("id", data.id).maybeSingle();
+    if (!plan) throw new Error("Plano não encontrado.");
+    const err = validatePlanPrice({ price_cents: data.price_cents, period_days: plan.period_days, active: data.active });
+    if (err) throw new Error(err);
+    const { error } = await db.from("plans").update({ price_cents: data.price_cents, active: data.active }).eq("id", data.id);
+    if (error) throw new Error("Falha ao salvar o plano.");
+    await audit(context.userId, "plan_updated", null, { plan: data.id, before: { price_cents: plan.price_cents, active: plan.active }, after: { price_cents: data.price_cents, active: data.active } });
+    return { ok: true };
   });
