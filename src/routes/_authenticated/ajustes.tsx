@@ -38,6 +38,7 @@ function Ajustes() {
       <Card className="mb-4 space-y-3">
         <h2 className="font-semibold">Conta</h2>
         <p className="text-sm text-muted-foreground">Conectado como {user.email}</p>
+        <OwnerLink />
         <button onClick={signOut} className={`${btn} border bg-secondary`}>
           <LogOut className="h-5 w-5" /> Sair
         </button>
